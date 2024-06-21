@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Restaurant ChatBot</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #chat {
+        border: 1px solid #ccc;
+        padding: 10px;
+        width: 300px;
+        height: 400px;
+        overflow-y: scroll;
+      }
+      #input {
+        margin-top: 10px;
+        width: calc(100% - 22px);
+        padding: 10px;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat"></div>
+    <input type="text" id="input" placeholder="Type your message here" />
+    <script>
+      const chat = document.getElementById("chat");
+      const input = document.getElementById("input");
+      const sessionId = Date.now().toString();
+      const options = `
+            Select 1 to Place an order<br>
+            Select 99 to checkout order<br>
+            Select 98 to see order history<br>
+            Select 97 to see current order<br>
+            Select 0 to cancel order`;
+
+      chat.innerHTML += `<p>Welcome!<br>${options}</p>`;
+
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          const message = input.value;
+          input.value = "";
+          chat.innerHTML += `<p>You: ${message}</p>`;
+          fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId, message }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              chat.innerHTML += `<p>Bot: ${data.text.replace(
+                /\n/g,
+                "<br>"
+              )}</p>`;
+              chat.scrollTop = chat.scrollHeight;
+            });
+        }
+      });
+    </script>
+  </body>
+</html>
